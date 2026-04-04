@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            padding-top: 20px;
+        }
+
+        /* 1. Introductory Overlay - Click to Start */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            cursor: pointer; /* Suggests clicking */
+            transition: opacity 0.7s ease-out;
+        }
+
+        .intro-text {
+            font-size: 32px;
+            font-weight: 300;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+        }
+
+        .tap-hint {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* 2. Main Content Wrapper */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .branding {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+        }
+
+        /* --- Main Video Card --- */
+        .video-card {
+            width: 300px;
+            height: 533px;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: #000;
+            z-index: 2;
+        }
+
+        .video-card.active-anim {
+            animation: shrinkAndLift 1s ease-in-out 2.5s forwards;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* --- Section Title --- */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #444;
+            margin-top: 2px;
+            opacity: 0;
+        }
+
+        .section-title.active-anim {
+            animation: fadeInLinks 0.8s ease-out 3s forwards;
+        }
+
+        /* --- Product Cards --- */
+        .product-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .product-container.active-anim {
+            animation: fadeInLinks 0.8s ease-out 3.2s forwards;
+        }
+
+        .product-card {
+            width: 180px; 
+            height: 240px; 
+            border-radius: 30px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+            transition: transform 0.3s ease;
+            text-decoration: none;
+            display: block;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+
+        .product-card:hover { transform: scale(1.05); }
+
+        /* --- Animations --- */
+        @keyframes shrinkAndLift {
+            to {
+                transform: scale(0.6) translateY(-150px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            }
+        }
+
+        @keyframes fadeInLinks {
+            to {
+                opacity: 1;
+                transform: translateY(-150px);
+            }
+        }
+    </style>
+</head>
+<body onclick="startExperience()">
+
+    <div id="intro" class="intro-overlay">
+        <div class="intro-text">welcome spammer0_o</div>
+        <div class="tap-hint">Tap to Enter</div>
+    </div>
+
+    <div id="mainContent" class="content-wrapper">
+        <div class="branding">sho1re1</div>
+
+        <div id="vCard" class="video-card">
+            <iframe 
+                id="ytPlayer"
+                src="https://www.youtube.com/embed/TWcI4wIP2sE?enablejsapi=1&autoplay=0&loop=1&playlist=TWcI4wIP2sE" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div id="sTitle" class="section-title">Products Mentioned</div>
+
+        <div id="pCont" class="product-container">
+            <a href="https://fktr.in/g0rtnaj" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/92e91b96-d170-495a-9132-763f1538c89b.jpg');"></a>
+            <a href="https://fktr.in/ohc66MO" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/42fd6808-8fd2-4a79-8ae5-5362fe0ab2f3.jpg');"></a>
+        </div>
+    </div>
+
+    <script>
+        function startExperience() {
+            // 1. Hide Intro
+            const intro = document.getElementById('intro');
+            if (intro.style.display === 'none') return; // Prevent double trigger
+            
+            intro.style.opacity = '0';
+            setTimeout(() => intro.style.display = 'none', 700);
+
+            // 2. Show Content
+            const content = document.getElementById('mainContent');
+            content.style.opacity = '1';
+
+            // 3. Trigger Animations
+            document.getElementById('vCard').classList.add('active-anim');
+            document.getElementById('sTitle').classList.add('active-anim');
+            document.getElementById('pCont').classList.add('active-anim');
+
+            // 4. Play Unmuted Video
+            // We refresh the src to trigger autoplay now that we have user interaction "permission"
+            const iframe = document.getElementById('ytPlayer');
+            iframe.src = "https://www.youtube.com/embed/TWcI4wIP2sE?autoplay=1&mute=0&loop=1&playlist=TWcI4wIP2sE";
+        }
+    </script>
+
+</body>
+</html>
