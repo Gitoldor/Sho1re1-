@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --card-radius: 40px;
+            --anim-delay: 2.5s;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        /* --- NEW EXIT ARROW --- */
+        .top-left-nav {
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            z-index: 50;
+        }
+
+        .exit-link {
+            text-decoration: none;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .exit-link:hover {
+            transform: translateX(-3px);
+        }
+
+        .exit-arrow {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Status Label Style */
+        .status-label {
+            position: absolute;
+            top: 25px;
+            left: 55px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #1a1a1a;
+            z-index: 50;
+        }
+        /* ---------------------- */
+
+        /* 1. Intro Overlay */
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100; cursor: pointer; transition: opacity 0.7s ease-out;
+        }
+
+        .intro-text { font-size: 32px; font-weight: 300; color: #1a1a1a; margin-bottom: 10px; }
+        .tap-hint { font-size: 14px; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* 2. Branding & Popup */
+        .branding-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .branding { font-size: 24px; font-weight: 800; color: #1a1a1a; letter-spacing: -1px; }
+        
+        .down-arrow {
+            width: 14px;
+            height: 14px;
+            border-right: 3px solid #1a1a1a;
+            border-bottom: 3px solid #1a1a1a;
+            transform: rotate(45deg);
+            margin-bottom: 5px;
+        }
+
+        .account-popup {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 15px;
+            z-index: 20;
+            display: none;
+            width: 200px;
+            border: 1px solid #eee;
+        }
+
+        .account-item {
+            padding: 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            display: block;
+            transition: background 0.2s;
+        }
+        .account-item:hover { background: #f5f5f5; }
+
+        /* 3. Content Wrapper */
+        .content-wrapper {
+            display: flex; flex-direction: column; align-items: center;
+            width: 100%; opacity: 0; transition: opacity 0.5s ease;
+        }
+
+        /* 4. Video Section & Dual Arrows */
+        .video-section {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            color: #333;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+        .nav-arrow svg { width: 100%; height: 100%; }
+        
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
+        .nav-arrow:hover { transform: scale(1.1); }
+
+        .video-card {
+            width: 300px; height: 533px;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: #000;
+            z-index: 2;
+            cursor: pointer;
+            position: relative;
+            transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        /* --- DYNAMIC PRODUCT TITLE --- */
+        .video-product-title {
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-bottom: 1.5px solid #1a1a1a;
+            padding-bottom: 2px;
+            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            z-index: 2;
+            opacity: 0;
+        }
+
+        .click-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; }
+
+        .video-card.active-anim { 
+            transform: scale(0.55) translateY(-240px);
+        }
+
+        .video-product-title.active-anim {
+            opacity: 1;
+            transform: translateY(-230px);
+        }
+
+        /* 5. Carousel & Footer */
+        .section-header, .carousel-wrapper, .footer-embed {
+            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            opacity: 0;
+            transform: translateY(0);
+        }
+
+        .section-header.active-anim, 
+        .carousel-wrapper.active-anim, 
+        .footer-embed.active-anim { 
+            opacity: 1; 
+            transform: translateY(-220px); 
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: baseline;
+            width: 360px; margin-top: 5px;
+        }
+
+        .section-title { font-size: 18px; font-weight: 600; color: #444; }
+        .swipe-hint { font-size: 11px; font-weight: 500; color: #bbb; text-transform: uppercase; }
+
+        .carousel-wrapper { width: 380px; overflow: hidden; margin-top: 10px; }
+
+        .product-carousel {
+            display: flex; gap: 15px; overflow-x: auto;
+            scroll-snap-type: x mandatory; padding: 5px 5px 20px 5px; scrollbar-width: none;
+        }
+        .product-carousel::-webkit-scrollbar { display: none; }
+
+        .product-card {
+            flex: 0 0 calc(50% - 7.5px); height: 240px;
+            border-radius: 30px; background-size: cover; background-position: center;
+            scroll-snap-align: start; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0; transition: transform 0.3s ease;
+        }
+
+        .footer-embed { width: 100%; max-width: 1000px; }
+
+        .embed-frame { width: 100%; height: 650px; border-radius: 30px; border: 1px solid #eee; background: #fafafa; }
+    </style>
+</head>
+<body onclick="handleGlobalClick(event)">
+
+    <div id="intro" class="intro-overlay" onclick="startExperience(event)">
+        <div class="intro-text">welcome bruh</div>
+        <div class="tap-hint">Tap to Enter</div>
+    </div>
+
+    <div id="mainContent" class="content-wrapper">
+
+        <div class="top-left-nav">
+            <a href="https://your-exit-url.com" class="exit-link">
+                <svg class="exit-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+        </div>
+        
+        <div class="status-label">REMIX</div>
+        
+        <div class="branding-container" 
+             onclick="togglePopup(event)" 
+             ondblclick="window.location.href='https://another-page.com'">
+            <div class="branding">sho1re1</div>
+            <div class="down-arrow"></div>
+            
+            <div id="accPopup" class="account-popup">
+                <a href="https://acc1.com" class="account-item">@main_account</a>
+                <a href="https://acc2.com" class="account-item">@backup_store</a>
+                <a href="https://acc3.com" class="account-item">@sho1re1_vids</a>
+            </div>
+        </div>
+
+        <div class="video-section">
+            <a href="https://gitoldor.github.io/Sho1re1-/" class="nav-arrow arrow-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </a>
+            
+            <div id="vCard" class="video-card" onclick="toggleSize(event)" ondblclick="window.location.href='https://youtube.com/shorts/qBbfjxXYp0c?si=VJMkHhNxFfl-d-Dz'">
+                <div class="click-layer"></div>
+                <iframe id="ytPlayer" src="" allow="autoplay; encrypted-media" style="width:100%; height:100%; border:none; pointer-events: none;"></iframe>
+            </div>
+
+            <a href="https://fktr.in/UY614k4" id="vTitle" class="video-product-title">Dual Tone Tees</a>
+
+            <a href="" class="nav-arrow arrow-right">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </div>
+
+        <div id="sHeader" class="section-header">
+            <span class="section-title">Products Mentioned</span>
+            <span class="swipe-hint">Swipe →</span>
+        </div>
+
+        <div id="pWrap" class="carousel-wrapper">
+            <div class="product-carousel">
+                <a href="https://fktr.in/UY614k4" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/4073bb63-f64f-4ecc-895f-dc2abc0a2183.jpg');"></a>
+                <a href="https://fktr.in/UY614k4" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/7de7bcd3-e961-4ee7-98b0-8eb13f909a29.jpg');"></a>
+                <a href="https://fktr.in/UY614k4" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/dd55e233-c31e-440b-9826-4d5de7d00815.jpg');"></a>
+                <a href="https://fktr.in/UY614k4" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/3e6c24c0-e741-4bc3-82e7-7f642cb36cc3.png');"></a>
+                <a href="https://fktr.in/UY614k4" class="product-card" style="background-image: url('https://i.supaimg.com/f6b811eb-511e-4182-93ac-f84ab56ea259/d1eafa8f-40cc-4211-9f77-a264f5966e7b.jpg');"></a>
+            </div>
+        </div>
+
+        <div id="fEmbed" class="footer-embed">
+            <iframe src="jk.html" class="embed-frame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const ids = ['vCard', 'vTitle', 'sHeader', 'pWrap', 'fEmbed'];
+        let isStarted = false;
+
+        function startExperience(event) {
+            event.stopPropagation();
+            const intro = document.getElementById('intro');
+            if (intro.style.display === 'none') return;
+            
+            intro.style.opacity = '0';
+            setTimeout(() => intro.style.display = 'none', 700);
+
+            document.getElementById('mainContent').style.opacity = '1';
+
+            // Initial shrink
+            setTimeout(() => {
+                ids.forEach(id => document.getElementById(id).classList.add('active-anim'));
+                isStarted = true;
+            }, 2500);
+
+            const iframe = document.getElementById('ytPlayer');
+            iframe.src = "https://www.youtube.com/embed/qBbfjxXYp0c?autoplay=1&mute=0&loop=1&playlist=qBbfjxXYp0c&controls=0&modestbranding=1";
+        }
+
+        function toggleSize(event) {
+            event.stopPropagation();
+            const vCard = document.getElementById('vCard');
+            if (vCard.classList.contains('active-anim')) {
+                ids.forEach(id => document.getElementById(id).classList.remove('active-anim'));
+            } else {
+                ids.forEach(id => document.getElementById(id).classList.add('active-anim'));
+            }
+        }
+
+        function handleGlobalClick(event) {
+            const vCard = document.getElementById('vCard');
+            if (isStarted && !vCard.classList.contains('active-anim')) {
+                if (!event.target.closest('.video-card') && !event.target.closest('.branding-container')) {
+                    ids.forEach(id => document.getElementById(id).classList.add('active-anim'));
+                }
+            }
+            
+            if (!event.target.closest('.branding-container')) {
+                document.getElementById('accPopup').style.display = 'none';
+            }
+        }
+
+        function togglePopup(event) {
+            event.stopPropagation();
+            const popup = document.getElementById('accPopup');
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>```
